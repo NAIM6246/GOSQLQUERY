@@ -5,6 +5,10 @@ type User struct {
 	NAME string `varchar(50);json:"name"`
 }
 
+type AddColumn struct {
+	ColName string `json:"colname"`
+}
+
 func UserTabel() string {
 	return "users"
 }

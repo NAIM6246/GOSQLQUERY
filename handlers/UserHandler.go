@@ -21,6 +21,7 @@ func NewUserHandler() *UserHandler {
 func (h *UserHandler) Handle(router chi.Router) {
 	router.Get("/", h.getUser)
 	router.Post("/", h.createUser)
+	router.Put("/", h.updateUserTable)
 	router.Delete("/", h.deleteUser)
 }
 
@@ -64,7 +65,19 @@ func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) getUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "under construstion :p")
+}
 
+func (h *UserHandler) updateUserTable(w http.ResponseWriter, r *http.Request) {
+	col := models.AddColumn{}
+	err := json.NewDecoder(r.Body).Decode(&col)
+	if err != nil {
+		w.WriteHeader(400)
+		w.Header().Add("content-type", "application/json")
+		w.Write([]byte(`{"message" : "bad request error"}`))
+		return
+	}
+	fmt.Println(col)
 	db, er := conn.ConnectionToDB()
 	if er != nil {
 		json.NewEncoder(w).Encode(er)
