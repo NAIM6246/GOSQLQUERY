@@ -11,11 +11,13 @@ import (
 )
 
 func main() {
-	conn.Connection()
+	db := conn.Connection()
 
 	router := chi.NewRouter()
 	userHandler := handlers.NewUserHandler()
 	router.Route("/users", userHandler.Handle)
 	fmt.Println("serving on port :8080")
 	http.ListenAndServe(":8000", router)
+
+	defer db.Close()
 }

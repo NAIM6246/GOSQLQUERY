@@ -2,9 +2,8 @@ package handlers
 
 import (
 	"GOSQL/conn"
+	"GOSQL/handlers/param"
 	"GOSQL/models"
-	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -19,28 +18,16 @@ func NewUserHandler() *UserHandler {
 }
 
 func (h *UserHandler) Handle(router chi.Router) {
+	router.Route("/{id}", func(router chi.Router) {
+		router.Get("/", h.getUserByID)
+	})
 	router.Get("/", h.getUser)
 	router.Post("/", h.createUser)
 	router.Put("/", h.updateUserTable)
 	router.Delete("/", h.deleteUser)
 }
 
-func insert(db *sql.DB, user models.User) (sql.Result, error) {
-	sqlStatement := `
-	INSERT INTO users (name)
-	VALUES (@nam)`
-	ctx := context.TODO()
-	d, err := db.ExecContext(ctx, sqlStatement, sql.Named("nam", user.NAME))
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("user created")
-	}
-
-	return d, err
-}
-
-//create
+//create : response e prblm ase!struct e convert korte partesi na sql.result re
 func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 	user := models.User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -51,21 +38,41 @@ func (h *UserHandler) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(user)
-	db, er := conn.ConnectionToDB()
-	if er != nil {
-		json.NewEncoder(w).Encode(er)
-	}
-	d, e := insert(db, user)
+	d, e := conn.Insert(user)
 	if e != nil {
 		fmt.Println("hi")
 		json.NewEncoder(w).Encode(e)
+		return
 	}
 
 	json.NewEncoder(w).Encode(d)
 }
 
 func (h *UserHandler) getUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "under construstion :p")
+
+	// users, err := conn.GetAll()
+	users, err := conn.GetALL()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(&users)
+	json.NewEncoder(w).Encode(users)
+
+}
+
+func (h *UserHandler) getUserByID(w http.ResponseWriter, r *http.Request) {
+	id := param.UInt(r, "id")
+	// models.User
+	user, err := conn.GetByID(id)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		w.Header().Add("content-type", "application/json")
+		w.Write([]byte(`{"message" : "user not found"}`))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Header().Add("content-type", "application/json")
+	json.NewEncoder(w).Encode(user)
 }
 
 func (h *UserHandler) updateUserTable(w http.ResponseWriter, r *http.Request) {
@@ -78,11 +85,8 @@ func (h *UserHandler) updateUserTable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(col)
-	db, er := conn.ConnectionToDB()
-	if er != nil {
-		json.NewEncoder(w).Encode(er)
-	}
-	conn.UpdateUserTable(db)
+
+	conn.UpdateUserTable()
 	fmt.Fprintf(w, "column added")
 }
 

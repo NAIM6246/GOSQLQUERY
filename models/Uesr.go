@@ -2,7 +2,7 @@ package models
 
 type User struct {
 	ID   int    ` json:"id"`
-	NAME string `varchar(50);json:"name"`
+	NAME string `json:"name"`
 }
 
 type AddColumn struct {
