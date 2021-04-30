@@ -20,11 +20,11 @@ func NewUserHandler() *UserHandler {
 func (h *UserHandler) Handle(router chi.Router) {
 	router.Route("/{id}", func(router chi.Router) {
 		router.Get("/", h.getUserByID)
+		router.Delete("/", h.deleteUser)
 	})
 	router.Get("/", h.getUser)
 	router.Post("/", h.createUser)
 	router.Put("/", h.updateUserTable)
-	router.Delete("/", h.deleteUser)
 }
 
 //create : response e prblm ase!struct e convert korte partesi na sql.result re
@@ -91,5 +91,6 @@ func (h *UserHandler) updateUserTable(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) deleteUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "delete user")
+	id := param.UInt(r, "id")
+	conn.Delete(id, models.UserTabel())
 }

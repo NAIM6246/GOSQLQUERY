@@ -31,6 +31,8 @@ func Connection() *sql.DB {
 	// defer dbInstance.Close()
 
 	createUserTable()
+	createArticleTable()
+	createCommentTable()
 
 	// updateUserTable(db)
 	return dbInstance

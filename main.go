@@ -16,6 +16,11 @@ func main() {
 	router := chi.NewRouter()
 	userHandler := handlers.NewUserHandler()
 	router.Route("/users", userHandler.Handle)
+	articleHandler := handlers.NewArticleHandler()
+	router.Route("/articles", articleHandler.Handle)
+	commentHandler := handlers.NewCommnetHandler()
+	router.Route("/comments", commentHandler.Handle)
+
 	fmt.Println("serving on port :8080")
 	http.ListenAndServe(":8000", router)
 
